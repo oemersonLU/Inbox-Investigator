@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Dataset and generated files stay on the local machine (see README, step 4)
+data/raw/*
+data/splits/*
+data/*.db
+models/*.joblib
+models/current.json
+!data/raw/.gitkeep
+!data/splits/.gitkeep
+!models/.gitkeep
