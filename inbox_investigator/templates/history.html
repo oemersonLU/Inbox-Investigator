@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}History - Inbox Investigator{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>History</h2>
+  <p><a class="btn secondary" href="{{ url_for('history_csv') }}">Export to CSV</a></p>
+  {% if not rows %}<p class="muted">No emails checked yet.</p>{% else %}
+  <table>
+    <thead><tr><th>Checked</th><th>Email</th><th>Model said</th><th>Confidence</th><th>You said</th><th></th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      {% set v = verdicts[r.predicted_class] %}
+      <tr>
+        <td class="small">{{ r.predicted_at[:16]|replace('T', ' ') }}</td>
+        <td>{{ r.subject or '(no subject)' }}<br><span class="small muted">{{ r.from_address or '' }}</span></td>
+        <td><span class="tag {{ v[1] }}">{{ v[0] }}</span></td>
+        <td>{% if r.confidence_score is not none %}{{ (r.confidence_score * 100)|round(1) }}%{% else %}unavailable{% endif %}</td>
+        <td>{% if r.user_label %}{{ r.user_label }}
+            {% if r.predicted_class != 'uncertain' and r.user_label != r.predicted_class %}<br><span class="small tag phish">disagrees with model</span>{% endif %}
+            {% else %}<span class="muted">-</span>{% endif %}</td>
+        <td><a href="{{ url_for('result', result_id=r.result_id) }}">Open</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

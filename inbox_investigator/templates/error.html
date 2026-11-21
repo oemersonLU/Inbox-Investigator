@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Error - Inbox Investigator{% endblock %}
+{% block content %}
+<div class="card" role="alert">
+  <h2>That email could not be read</h2>
+  <p>{{ message }}</p>
+  <p class="muted">Nothing was checked or saved. Try a .eml or .txt file, or paste the text.</p>
+  <p><a class="btn" href="{{ url_for('index') }}">Back</a></p>
+</div>
+{% endblock %}

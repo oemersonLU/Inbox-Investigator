@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Review queue - Inbox Investigator{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Review queue</h2>
+  <p class="muted">These emails scored below the confidence cutoff, so the model did not make a call. You decide.</p>
+  {% if not rows %}
+    <p>Nothing to review. Emails the model is unsure about will appear here.</p>
+  {% endif %}
+  {% for r in rows %}
+    <div style="border-top:1px solid var(--line); padding:12px 0">
+      <p style="margin:0"><strong>{{ r.subject or '(no subject)' }}</strong>
+        {% if r.from_address %}<span class="muted small"> from {{ r.from_address }}</span>{% endif %}</p>
+      <p class="small muted" style="margin:2px 0 8px">Model confidence {{ (r.confidence_score * 100)|round(1) if r.confidence_score is not none else 'unavailable' }}%
+        &middot; <a href="{{ url_for('result', result_id=r.result_id) }}">open full email</a></p>
+      <p class="small" style="margin:0 0 8px">{{ r.preview }}{% if r.preview|length >= 220 %}...{% endif %}</p>
+      <div class="row-actions">
+        <form method="post" action="{{ url_for('feedback', result_id=r.result_id) }}">
+          <input type="hidden" name="next" value="review">
+          <button name="user_label" value="phishing" type="submit">Phishing</button>
+          <button class="secondary" name="user_label" value="legitimate" type="submit">Legitimate</button>
+        </form>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

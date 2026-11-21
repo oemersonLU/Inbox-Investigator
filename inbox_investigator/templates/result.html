@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Result - Inbox Investigator{% endblock %}
+{% block content %}
+<div class="verdict {{ css }}">
+  <p class="v">{{ verdict }}</p>
+  {% if r.confidence_score is not none %}
+    <p style="margin:4px 0 0">Confidence: <strong>{{ (r.confidence_score * 100)|round(1) }}%</strong>
+       <span class="small">(probability of phishing: {{ (r.phishing_probability * 100)|round(1) }}%)</span></p>
+    <div class="bar" role="img"
+         aria-label="Confidence {{ (r.confidence_score * 100)|round(0)|int }} percent; not-sure cutoff at {{ (r.uncertain_below * 100)|round(0)|int }} percent">
+      <div class="fill" style="width: {{ (r.confidence_score * 100)|round(1) }}%"></div>
+      <div class="cut" style="left: {{ (r.uncertain_below * 100)|round(1) }}%" title="Not-sure cutoff"></div>
+    </div>
+    <p class="small" style="margin:0">The dark mark is the "not sure" cutoff ({{ (r.uncertain_below * 100)|round(0)|int }}%). Below it the model does not make a call.</p>
+  {% else %}
+    <p style="margin:4px 0 0">Confidence: <strong>unavailable</strong>
+       <span class="small">(the keyword rule does not produce a confidence)</span></p>
+  {% endif %}
+  {% if r.predicted_class == 'uncertain' %}
+    <p><strong>The model is not confident enough to call this one.</strong> Please look at it yourself.
+       {% if not r.user_label %}It is in the <a href="{{ url_for('review') }}">review queue</a>.{% endif %}</p>
+  {% else %}
+    <p class="small" style="margin-bottom:0">"Likely" means the model could be wrong. Use your own judgement for anything important.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h3>The email</h3>
+  <p class="small muted">
+    {% if r.subject %}<strong>Subject:</strong> {{ r.subject }}<br>{% endif %}
+    {% if r.from_address %}<strong>From:</strong> {{ r.from_address }}<br>{% endif %}
+    {% if r.to_address %}<strong>To:</strong> {{ r.to_address }}<br>{% endif %}
+    {% if r.n_attachments %}<strong>Attachments:</strong> {{ r.n_attachments }} (not scanned)<br>{% endif %}
+    Checked with <code>{{ r.version_name }}</code> in {{ r.latency_ms }} ms.
+  </p>
+  <pre class="email">{{ body }}</pre>
+</div>
+
+<div class="card">
+  <h3>What influenced the result</h3>
+  {% if explain and explain.kind == 'model' %}
+    <div class="cols">
+      <div><strong>Pushed toward phishing</strong>
+        {% if explain.phish %}<ul class="words">{% for w, c in explain.phish %}<li>{{ w }}</li>{% endfor %}</ul>
+        {% else %}<p class="muted small">Nothing notable.</p>{% endif %}</div>
+      <div><strong>Pushed toward legitimate</strong>
+        {% if explain.legit %}<ul class="words">{% for w, c in explain.legit %}<li>{{ w }}</li>{% endfor %}</ul>
+        {% else %}<p class="muted small">Nothing notable.</p>{% endif %}</div>
+    </div>
+    <p class="small muted">Words and message features, strongest first. If these do not make sense for this email, trust your own reading.</p>
+  {% elif explain and explain.kind == 'keywords' %}
+    {% if explain.hits %}<p>Suspicious keywords found: {{ explain.hits|join(', ') }}.</p>
+    {% else %}<p>No suspicious keywords found.</p>{% endif %}
+  {% else %}
+    <p class="muted">Not available: this result was made by a different model version than the one running now.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h3>Is this wrong? Correct it</h3>
+  {% if r.user_label %}<p>You marked this as <strong>{{ r.user_label }}</strong>.
+    {% if r.user_comment %}Note: {{ r.user_comment }}{% endif %} You can change it below.</p>{% endif %}
+  <form method="post" action="{{ url_for('feedback', result_id=r.result_id) }}">
+    <span class="radio"><label class="radio"><input type="radio" name="user_label" value="phishing" required {% if r.user_label == 'phishing' %}checked{% endif %}> This is phishing</label></span>
+    <span class="radio"><label class="radio"><input type="radio" name="user_label" value="legitimate" {% if r.user_label == 'legitimate' %}checked{% endif %}> This is legitimate</label></span>
+    <label for="comment">Note (optional)</label>
+    <input type="text" id="comment" name="comment" maxlength="300" value="{{ r.user_comment or '' }}">
+    <p><button type="submit">Save my label</button></p>
+  </form>
+  <p class="small muted">Your label is saved with the result. If it disagrees with the model it is also logged as a misclassification so the model can be improved.</p>
+</div>
+{% endblock %}

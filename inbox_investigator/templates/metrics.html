@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Model metrics - Inbox Investigator{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Model metrics <span class="muted small">(developer view)</span></h2>
+  {% if not table %}
+    <p>No evaluation results yet. Run train.bat (it trains the model and then evaluates it).</p>
+  {% else %}
+    <p class="muted">Model <code>{{ version }}</code> vs the keyword baseline, on the same held-out test split.</p>
+    <table>
+      <thead><tr><th>Metric</th><th>Keyword baseline</th><th>Model</th></tr></thead>
+      <tbody>
+      {% for name, b, m in table %}
+        <tr><td>{{ name }}</td>
+            <td>{% if b is not none %}{{ (b * 100)|round(2) }}%{% else %}-{% endif %}</td>
+            <td>{% if m is not none %}{{ (m * 100)|round(2) }}%{% else %}-{% endif %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% if latency[0] is not none %}
+      <p class="small muted">Time to classify one email: mean {{ '%.3f'|format(latency[0]) }} s, max {{ '%.3f'|format(latency[1]) }} s.</p>
+    {% endif %}
+  {% endif %}
+</div>
+{% if table %}
+<div class="card">
+  <h3>False-positive rate by writing style</h3>
+  <p class="small muted">Share of legitimate emails wrongly flagged as phishing, per group.
+    {% if gap is not none %}Gap between the best and worst group: <strong>{{ (gap * 100)|round(2) }} percentage points</strong>.{% endif %}
+    Full table in results/results_table.md.</p>
+  <table>
+    <thead><tr><th>Group</th><th>False-positive rate</th></tr></thead>
+    <tbody>{% for g in fpr %}<tr><td>{{ g.grp }}</td><td>{{ (g.metric_value * 100)|round(2) }}%</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

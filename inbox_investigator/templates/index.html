@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>Check an email</h2>
+  <p class="muted">Upload an .eml or .txt file, or paste the email text. Everything stays on this computer.
+     The result is advice only: nothing is deleted, moved, or blocked.</p>
+  <form method="post" action="{{ url_for('check') }}" enctype="multipart/form-data">
+    <label for="file">Upload a file (.eml or .txt)</label>
+    <input type="file" id="file" name="file" accept=".eml,.txt">
+    <label for="text">...or paste the email text (headers optional)</label>
+    <textarea id="text" name="text" placeholder="Subject: ...&#10;&#10;Dear customer, ..."></textarea>
+    <p><button type="submit">Check email</button></p>
+  </form>
+</div>
+{% endblock %}

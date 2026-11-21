@@ -1,0 +1,15 @@
+From: "PayPal Security" <service@paypa1-secure-login.xyz>
+To: you@example.com
+Subject: URGENT: Your account has been suspended
+Date: Tue, 17 Nov 2026 09:12:00 -0500
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+
+Dear customer,
+
+We noticed unusual activity on your account. Your account has been suspended.
+Click here to verify your account immediately: http://203.0.113.45/paypal/login
+If you do not confirm your password within 24 hours your account will be closed.
+
+Act now!
+PayPal Security Team
