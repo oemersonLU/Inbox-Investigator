@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 from . import config
 
-TEXT_COLUMNS = ["email text", "email_text", "text", "body", "email", "content", "message"]
+TEXT_COLUMNS = ["email text", "email_text", "text", "body", "email", "content", "message", "text_combined"]
 LABEL_COLUMNS = ["email type", "email_type", "label", "class", "type", "category", "target"]
 
 
